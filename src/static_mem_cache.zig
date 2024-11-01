@@ -1,5 +1,6 @@
 const std = @import("std");
 const assert = std.debug.assert;
+const AtomicOrder = std.builtin.AtomicOrder;
 
 fn MemCacheSlot(comptime T: type) type {
     return extern union {
@@ -58,12 +59,17 @@ pub fn StaticMemCache(comptime T: type) type {
         }
 
         pub fn create(self: *Self) !*T {
-            if (self.free_first == null) {
-                return StaticMemCacheError.OutOfMemory;
+            while (true) {
+                const free_slot = self.free_first;
+                if (self.free_first == null) {
+                    return StaticMemCacheError.OutOfMemory;
+                }
+                if (self.free_first_swap(free_slot, free_slot.?.free_next) == null) {
+                    return &free_slot.?.buffer;
+                } else {
+                    continue;
+                }
             }
-            const free_slot = self.free_first orelse unreachable;
-            self.free_first = free_slot.free_next;
-            return &free_slot.buffer;
         }
 
         pub fn destroy(self: *Self, ptr: *T) !void {
@@ -74,8 +80,26 @@ pub fn StaticMemCache(comptime T: type) type {
                 return StaticMemCacheError.InvalidPointer;
             }
             const slot_ptr: *Slot = @ptrFromInt(uptr);
-            slot_ptr.free_next = self.free_first;
-            self.free_first = slot_ptr;
+            while (true) {
+                const free_first = self.free_first;
+                slot_ptr.free_next = free_first;
+                if (self.free_first_swap(free_first, slot_ptr) == null) {
+                    return;
+                } else {
+                    continue;
+                }
+            }
+        }
+
+        fn free_first_swap(self: *Self, old: ?*Slot, new: ?*Slot) ??*Slot {
+            return @cmpxchgWeak(
+                ?*Slot,
+                &self.free_first,
+                old,
+                new,
+                AtomicOrder.monotonic,
+                AtomicOrder.monotonic,
+            );
         }
     };
 }
