@@ -24,9 +24,9 @@ int event_queue_add(struct event_queue *queue, struct event_node *event)
 	// queue->event_head is a "pseudo" head (I don't know proper term for this).
 	// It doesn't actually hold a value, it's just a link.
 	while (&curr->link != &queue->event_head) {
-		// If the event to add has a lower priority value (this equals higher priority)
-		// then we stop.
-		if (event->event.priority < curr->event.priority) {
+		// If the event to add should run sooner then we stop.
+		if (event->event.run_timestamp_ms <
+		    curr->event.run_timestamp_ms) {
 			break;
 		}
 		prev = curr;
