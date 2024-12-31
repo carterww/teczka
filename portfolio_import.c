@@ -131,7 +131,7 @@ portfolio_import_fidelity(struct portfolio *portfolio,
 			(void)static_mem_cache_free(equity_cache, equity_node);
 			break;
 		default:
-			exit(1);
+			exit(1); // Shouldn't be possible
 		}
 	}
 exit_loop:

@@ -6,8 +6,10 @@ CFLAGS = -Werror -std=c11 -Wpedantic -Wall -Wextra -Wno-unused -Wfloat-equal -Wd
 OBJ = main.o event.o portfolio.o static_mem_cache.o portfolio_import.o
 OBJ_OUT = $(patsubst %, build/%, $(OBJ))
 
+LINK_LIBS = -lcurl
+
 all: build bin $(OBJ_OUT)
-	$(CC) -o bin/$(TARGET) $(OBJ_OUT)
+	$(CC) -o bin/$(TARGET) $(OBJ_OUT) $(LINK_LIBS)
 
 build/%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@

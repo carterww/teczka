@@ -1,4 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
+
+#include <curl/curl.h>
+#include <curl/multi.h>
 
 #include "config.h"
 #include "event.h"
@@ -15,8 +19,14 @@ static struct static_mem_cache event_node_cache;
 static struct portfolio portfolio;
 static struct event_queue event_queue;
 
+static CURLM *curl_multi_handle = NULL;
+
 static char *fidelity_csv_path_get(int argc, char *argv[]);
 static int globals_init(void);
+static void globals_cleanup(void);
+
+void _curl_init(void);
+void _curl_cleanup(void);
 
 int main(int argc, char *argv[])
 {
@@ -38,6 +48,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	globals_cleanup();
 	return 0;
 }
 
@@ -82,5 +93,38 @@ static int globals_init(void)
 		printf("Failed to initialize the event queue\n");
 		return 1;
 	}
+	_curl_init();
 	return 0;
+}
+
+static void globals_cleanup(void)
+{
+	_curl_cleanup();
+}
+
+void _curl_init(void)
+{
+	CURLcode curl_init_result =
+		curl_global_init(CURL_GLOBAL_SSL | CURL_GLOBAL_ACK_EINTR);
+	if (CURLE_OK != curl_init_result) {
+		printf("curl_global_init failed with code %d\n",
+		       curl_init_result);
+		exit(1);
+	}
+	curl_multi_handle = curl_multi_init();
+	if (NULL == curl_multi_handle) {
+		printf("curl_multi_init failed\n");
+		exit(1);
+	}
+}
+void _curl_cleanup(void)
+{
+	CURLMcode multi_cleanup_result = curl_multi_cleanup(curl_multi_handle);
+	if (CURLM_OK != multi_cleanup_result) {
+		printf("curl_multi_cleanup failed with code %d\n",
+		       multi_cleanup_result);
+		curl_global_cleanup();
+		exit(1);
+	}
+	curl_global_cleanup();
 }
