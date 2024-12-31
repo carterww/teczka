@@ -15,7 +15,7 @@ size_t teczka_curl_write_callback(char *data, size_t size, size_t nmemb,
 int teczka_curl_timer_callback(CURLM *multi_handle, long timeout_ms,
 			       void *event_queue_ptr)
 {
-	uint64_t now_ms = get_timestamp_ms();
+	uint64_t now_ms = timestamp_ms_get();
 	if (NULL == event_queue_ptr) {
 		printf("No user defined pointer passed to teczka_curl_timer_callback. "
 		       "This could be due to a CURL bug or curl_multi_setopt was never called "

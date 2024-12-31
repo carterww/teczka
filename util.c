@@ -16,7 +16,7 @@ static inline uint64_t timespec_to_ms(const struct timespec *ts)
 }
 
 // NOT TIME SINCE EPOCH. DON'T EXPECT THAT
-uint64_t get_timestamp_ms(void)
+uint64_t timestamp_ms_get(void)
 {
 	struct timespec ts;
 	// CLOCK_BOOTTIME is preferred here because it is not
