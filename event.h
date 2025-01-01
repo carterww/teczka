@@ -49,7 +49,7 @@ struct event {
 struct event_io_curl {
 	CURL *easy_handle;
 	curl_socket_t sockfd;
-	uint32_t epoll_curr_bitmask;
+	struct event *event;
 	struct data_buffer buffer;
 };
 

@@ -8,7 +8,7 @@
 #include "event.h"
 
 struct teczka_curl_socket_callback_context {
-	int epoll_fd;
+	CURLM *multi_handle;
 	struct event_io_curl *event_io_array;
 };
 

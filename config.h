@@ -23,4 +23,6 @@ static const char *PORTFOLIO_IMPORT_TICKER_IGNORE[] = {
 #define EVENT_LOOP_EPOLL_SIZE (8)
 #define EVENT_LOOP_EPOLL_EVENTS_LEN (4)
 
+#define EVENT_LOOP_FDS_MAX (16)
+
 #endif // _TECZKA_CONFIG_H
