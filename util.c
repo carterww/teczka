@@ -1,6 +1,7 @@
 // This is not good but I need monotonic time
 #define _POSIX_C_SOURCE 199309L
 
+#include <errno.h>
 #include <stdint.h>
 #include <time.h>
 
@@ -15,6 +16,12 @@ static inline uint64_t timespec_to_ms(const struct timespec *ts)
 	       (uint64_t)ts->tv_nsec / NS_PER_MS;
 }
 
+static inline void ms_to_timespec(int64_t ms, struct timespec *ts)
+{
+	ts->tv_sec = ms / MS_PER_SEC;
+	ts->tv_nsec = (ms % MS_PER_SEC) * NS_PER_MS;
+}
+
 // NOT TIME SINCE EPOCH. DON'T EXPECT THAT
 uint64_t timestamp_ms_get(void)
 {
@@ -25,6 +32,17 @@ uint64_t timestamp_ms_get(void)
 	// not have to correspond to the time since epoch.
 	(void)clock_gettime(CLOCK_BOOTTIME, &ts);
 	return timespec_to_ms(&ts);
+}
+
+void sleep_ms(uint64_t ms)
+{
+	struct timespec ts;
+	struct timespec rem;
+	ms_to_timespec(ms, &ts);
+	int sleep_result;
+	while ((sleep_result = nanosleep(&ts, &rem)) < 0 && EINTR == errno) {
+		ts = rem;
+	}
 }
 
 #undef NS_PER_MS

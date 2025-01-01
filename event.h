@@ -1,9 +1,10 @@
 #ifndef _TECZKA_EVENT_H
 #define _TECZKA_EVENT_H
 
+#include "util.h"
 #include <stdint.h>
 
-#include <curl/multi.h>
+#include <curl/curl.h>
 
 #include "equity.h"
 #include "kette.h"
@@ -38,20 +39,18 @@ struct event {
 	enum event_tag tag;
 	uint64_t run_timestamp_ms; // When event needs to be executed
 	union {
-		struct event_stock_fetch stock_fetch_param;
-		struct event_stock_display stock_display_param;
-		struct event_portfolio_display portfolio_display_param;
-		struct event_curl_timeout curl_timeout_param;
+		struct event_stock_fetch stock_fetch_info;
+		struct event_stock_display stock_display_info;
+		struct event_portfolio_display portfolio_display_info;
+		struct event_curl_timeout curl_timeout_info;
 	};
 };
 
-// Being precise for the curl_timeout event is important. We'll keep a struct for
-// tracking the max time each event takes to run. If curl_timeout needs to be handled
-// before the highest priority event will finish (just a guess), then we need to know.
-struct event_runtime_max_ms {
-	uint64_t stock_fetch;
-	uint64_t stock_display;
-	uint64_t portfolio_display;
+struct event_io_curl {
+	CURL *easy_handle;
+	curl_socket_t sockfd;
+	uint32_t epoll_curr_bitmask;
+	struct data_buffer buffer;
 };
 
 struct event_node {
@@ -64,7 +63,6 @@ struct event_queue {
 	// There can only be one outstanding curl_timeout so we'll keep it here.
 	// We need to check this often anyway.
 	struct event curl_timeout_event;
-	struct event_runtime_max_ms runtimes;
 };
 
 int event_queue_init(struct event_queue *queue);

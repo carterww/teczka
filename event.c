@@ -10,6 +10,7 @@ int event_queue_init(struct event_queue *queue)
 		return 1;
 	}
 	slist_init(&queue->event_head);
+	queue->curl_timeout_event = (struct event){ 0 };
 	return 0;
 }
 

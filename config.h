@@ -16,4 +16,11 @@ static const char *PORTFOLIO_IMPORT_TICKER_IGNORE[] = {
 	"Pending Activity",
 };
 
+// Event config
+#define EVENT_IO_CURL_BUFFER_LEN (8)
+// This param for epoll has been ignored since Linux 2.6.8 but we'll
+// make a sensible default for portability
+#define EVENT_LOOP_EPOLL_SIZE (8)
+#define EVENT_LOOP_EPOLL_EVENTS_LEN (4)
+
 #endif // _TECZKA_CONFIG_H
