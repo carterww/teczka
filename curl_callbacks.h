@@ -8,13 +8,13 @@
 #include "event.h"
 
 struct teczka_curl_socket_callback_context {
-	int epollfd;
+	int epoll_fd;
 	struct event_io_curl *event_io_array;
 };
 
 // IMPORTANT NOTE: These callbacks SHOULD NOT call libcurl functions. CURL's docs state
 // it can lead to recursive behavior.
-// EXCEPTION: curl_multi_assign can be called from callbacks. This is useful when the socket
+// EXCEPTION: curl_multi_assign can be called from mulit callbacks. This is useful when the socket
 // callback is removing a socket. We'd like to unassociate our pointer with that socket.
 
 // https://curl.se/libcurl/c/CURLOPT_WRITEFUNCTION.html

@@ -11,7 +11,11 @@
 // REMINDER: DO NOT CALL CURL FUNCTIONS FROM THESE!!!
 
 size_t teczka_curl_write_callback(char *data, size_t size, size_t nmemb,
-				  void *my_ptr);
+				  void *my_ptr)
+{
+	return 0;
+}
+
 int teczka_curl_timer_callback(CURLM *multi_handle, long timeout_ms,
 			       void *event_queue_ptr)
 {
@@ -46,4 +50,9 @@ int teczka_curl_timer_callback(CURLM *multi_handle, long timeout_ms,
 }
 
 int teczka_curl_socket_callback(CURL *easy_handle, curl_socket_t socket,
-				int what, void *my_ptr, void *socket_ptr);
+				int what,
+				void *teczka_curl_socket_callback_context_ptr,
+				void *event_io_curl_ptr)
+{
+	return -1;
+}
