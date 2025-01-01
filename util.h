@@ -10,7 +10,11 @@ struct data_buffer {
 	size_t buffer_used_bytes;
 };
 
-// NOT TIME SINCE EPOCH. DON'T EXPECT THAT
+/* Returns a timestamp in milliseconds from some unspecified staring point.
+ * The timestamps returned by this function only move forward and will not
+ * have large shifts in time between consecutive calls.
+ * The timestamp does NOT correspond to calendar time (it's not time since epoch).
+ */
 uint64_t timestamp_ms_get(void);
 
 void sleep_ms(uint64_t ms);

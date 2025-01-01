@@ -1,4 +1,5 @@
-// This is not good but I need monotonic time
+// This is not good but I can't rely on calendar time for scheduling
+// (which is all standard libc provides)
 #define _POSIX_C_SOURCE 199309L
 
 #include <errno.h>
@@ -22,14 +23,12 @@ static inline void ms_to_timespec(int64_t ms, struct timespec *ts)
 	ts->tv_nsec = (ms % MS_PER_SEC) * NS_PER_MS;
 }
 
-// NOT TIME SINCE EPOCH. DON'T EXPECT THAT
 uint64_t timestamp_ms_get(void)
 {
 	struct timespec ts;
-	// CLOCK_BOOTTIME is preferred here because it is not
-	// affected by NTP (unlike CLOCK_REALTIME) and includes
-	// suspend time (unlike CLOCK_MONOTONIC). For my purposes, this does
-	// not have to correspond to the time since epoch.
+	// CLOCK_BOOTTIME is preferred here because it is not affected by large jitters
+	// due to NTP or settimeofday (unlike CLOCK_REALTIME) and includes suspend time
+	// (unlike CLOCK_MONOTONIC).
 	(void)clock_gettime(CLOCK_BOOTTIME, &ts);
 	return timespec_to_ms(&ts);
 }
@@ -38,11 +37,12 @@ void sleep_ms(uint64_t ms)
 {
 	struct timespec ts;
 	struct timespec rem;
-	ms_to_timespec(ms, &ts);
-	int sleep_result;
-	while ((sleep_result = nanosleep(&ts, &rem)) < 0 && EINTR == errno) {
+	ms_to_timespec(ms, &rem);
+	int sleep_result = -1;
+	do {
 		ts = rem;
-	}
+		sleep_result = nanosleep(&ts, &rem);
+	} while (0 != sleep_result && EINTR == errno);
 }
 
 #undef NS_PER_MS
