@@ -27,9 +27,13 @@ struct event_runtime_max_ms {
 static int epoll_fd = -1;
 static CURLM *curl_multi_handle = NULL;
 
-static struct epoll_event epoll_wait_events[EVENT_LOOP_EPOLL_EVENTS_LEN];
+// Setting this to 0 because I'm unsure what epoll_wait expects. This is the safest
+// option.
+static struct epoll_event epoll_wait_events[EVENT_LOOP_EPOLL_EVENTS_LEN] = { 0 };
+// Setting this to 0 because this ensures the application will see they are all empty
+// on init.
+static struct event_io_curl event_io_inflight[EVENT_IO_CURL_BUFFER_LEN] = { 0 };
 static struct event_node EVENT_NODE_STATIC_BUFFER[MEM_CACHE_EVENT_NODE_COUNT];
-static struct event_io_curl event_io_inflight[EVENT_IO_CURL_BUFFER_LEN];
 static struct static_mem_cache event_node_cache;
 static struct event_queue event_queue;
 
